@@ -11,7 +11,7 @@ const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
-  port:3307,
+  port:3306,
   database: "hospital_management"
 });
 
@@ -60,4 +60,40 @@ app.get("/users", (req, res) => {
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");
+});
+
+
+// Admin
+
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.json({ success: false, message: "All fields required" });
+  }
+
+  const query = "SELECT * FROM users WHERE email = ?";
+  db.query(query, [email], (err, result) => {
+    if (err) {
+      console.error("❌ Database error:", err);
+      return res.json({ success: false, message: "Database error" });
+    }
+
+    if (result.length === 0) {
+      return res.json({ success: false, message: "Email not found" });
+    }
+
+    const user = result[0];
+
+    // Compare password directly (simple version)
+    if (password === user.password) {
+      res.json({
+        success: true,
+        message: "Login successful",
+        user: { id: user.id, name: user.name, email: user.email },
+      });
+    } else {
+      res.json({ success: false, message: "Invalid password" });
+    }
+  });
 });

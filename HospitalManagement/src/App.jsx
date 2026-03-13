@@ -6,6 +6,7 @@ import Adminlog from './pages/Adminlog';
 import Stafflog from './pages/Stafflog';
 import Doctorlog from './pages/Doctorlog';
 import Register from './pages/Register';
+import AdminPage from './pages/AdminPage';
 
 function App(){
   return(
@@ -18,6 +19,7 @@ function App(){
           <Route path='/stafflog' element={<Stafflog/>}/>
           <Route path='/doctorlog' element={<Doctorlog/>}/>
           <Route path='/register' element={<Register/>}/>
+          <Route path='/adminpage' element={<AdminPage/>}/>
         </Routes>
       </BrowserRouter>
     </>
