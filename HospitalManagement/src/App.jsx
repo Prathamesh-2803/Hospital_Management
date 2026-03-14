@@ -7,6 +7,8 @@ import Stafflog from './pages/Stafflog';
 import Doctorlog from './pages/Doctorlog';
 import Register from './pages/Register';
 import AdminPage from './pages/AdminPage';
+import DoctorPage from './pages/DoctorPage';
+import StaffPage from './pages/StaffPage';
 
 function App(){
   return(
@@ -20,6 +22,8 @@ function App(){
           <Route path='/doctorlog' element={<Doctorlog/>}/>
           <Route path='/register' element={<Register/>}/>
           <Route path='/adminpage' element={<AdminPage/>}/>
+          <Route path='/doctorpage' element={<DoctorPage/>}/>
+          <Route path='/staffpage' element={<StaffPage/>}/>
         </Routes>
       </BrowserRouter>
     </>

@@ -2,7 +2,7 @@ function AdminPage(){
 
  return(
     <>
-        <p>hello</p>
+        <h1>Admin Page</h1>
     </>
  )
 

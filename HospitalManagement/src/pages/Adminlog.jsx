@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 function Adminlog() {
     const [email, setEmail] = useState("");
     const [password, setPwd] = useState("");
+     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -34,9 +35,7 @@ function Adminlog() {
                     <form onSubmit={handleLogin}>
                         <input type="text" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
                         <input type="password" placeholder="Password" value={password} onChange={(e) => setPwd(e.target.value)} />
-                        <button className="btn btn-outline-success">
-                            <a href="/adminpage">Login</a>
-                        </button>
+                        <button type="submit" className="btn btn-outline-success">Login</button>
                         <hr />
                         <div className="end">
                             <p>New Admin?</p>
