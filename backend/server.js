@@ -136,3 +136,23 @@ app.delete("/delete-doctor/:id", (req, res) => {
     res.send({ message: "Deleted" });
   });
 });
+
+app.put("/update-doctor/:id", (req, res) => {
+  console.log("PUT /update-doctor/:id hit — id:", req.params.id);
+  const { name, specialization, dept, phone, email, status } = req.body;
+  db.query(
+    "UPDATE doctors SET name = ?, specialization = ?, dept = ?, phone = ?, email = ?, status = ? WHERE id = ?",
+    [name, specialization, dept, phone, email, status, req.params.id],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(400).json({
+          success: false,
+          message: err.sqlMessage || "Doctor Update Failed"
+        });
+      } else {
+        res.send({ success: true, message: "Doctor Updated Successfully" });
+      }
+    }
+  );
+});
