@@ -13,29 +13,47 @@ const defaultForm = {
     status: "Active"
 };
 
+const defaultPatientForm = {
+    id: "",
+    name: "",
+    age: "",
+    disease: "",
+    doctor: "",
+    admission: "",
+    status: "Admitted"
+};
+
 function AdminPage() {
     const [activePage, setActivePage] = useState("dashboard");
 
+    // DOCTOR STATES
     const [doctors, setDoctors] = useState([]);
     const [search, setSearch] = useState("");
-
-    const [patients] = useState([]);
-    const [staff] = useState([]);
-    const [appointments] = useState([]);
-
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
-
     const [formData, setFormData] = useState(defaultForm);
+
+
+    // PATIENT STATES
+    const [patients, setPatients] = useState([]);
+    const [showPatientModal, setShowPatientModal] = useState(false);
+    const [isPatientEditing, setIsPatientEditing] = useState(false);
+    const [editingPatientId, setEditingPatientId] = useState(null);
+    const [patientForm, setPatientForm] = useState(defaultPatientForm);
+
+    const [staff] = useState([]);
+    const [appointments] = useState([]);
 
     const handleChange = (e) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    // FETCH DOCTORS
-    useEffect(() => { fetchDoctors(); }, []);
-
+    // useeffect to fetch
+    useEffect(() => {
+        fetchDoctors();
+        fetchPatients();   // ✅ ADD THIS
+    }, []);
     const fetchDoctors = () => {
         axios.get("http://localhost:5000/doctors")
             .then((res) => setDoctors(res.data))
@@ -115,6 +133,85 @@ function AdminPage() {
     const filteredDoctors = doctors.filter((doc) =>
         doc.name?.toLowerCase().includes(search.toLowerCase())
     );
+
+    // ── PATIENT FUNCTIONS ──
+
+    const fetchPatients = () => {
+        axios.get("http://localhost:5000/patients")
+            .then((res) => setPatients(res.data))
+            .catch((err) => console.log(err));
+    };
+
+    // HANDLE INPUT
+    const handlePatientChange = (e) => {
+        setPatientForm((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
+    };
+
+    // OPEN ADD
+    const addPatient = () => {
+        setPatientForm({ ...defaultPatientForm });
+        setIsPatientEditing(false);
+        setShowPatientModal(true);
+    };
+
+    // OPEN EDIT
+    const editPatient = (p) => {
+        setEditingPatientId(p.id);
+        setPatientForm({
+            ...p,
+            admission: p.admission?.slice(0, 10) // Ensure date is in YYYY-MM-DD format for input
+        });
+        setIsPatientEditing(true);
+        setShowPatientModal(true);
+    };
+
+    // SAVE (ADD + UPDATE)
+    const savePatient = () => {
+        if (!patientForm.id || !patientForm.name) {
+            alert("ID and Name are required!");
+            return;
+        }
+
+        // ✅ FIX: Don't force 'id' to a Number if your DB is now VARCHAR.
+        // Also, ensure age is handled safely.
+        const payload = {
+            ...patientForm,
+            id: String(patientForm.id), // Ensure it's a string for VARCHAR
+            age: patientForm.age ? Number(patientForm.age) : 0
+        };
+
+        if (isPatientEditing) {
+            axios.put(`http://localhost:5000/update-patient/${editingPatientId}`, payload)
+                .then(() => {
+                    fetchPatients();
+                    setShowPatientModal(false);
+                    setIsPatientEditing(false);
+                })
+                .catch((err) => console.log("Update Error:", err));
+        } else {
+            axios.post("http://localhost:5000/add-patient", payload)
+                .then(() => {
+                    fetchPatients();
+                    setShowPatientModal(false);
+                })
+                .catch((err) => {
+                    console.log("Add Error Details:", err.response?.data); // Improved logging
+                    alert("Failed to add patient. Check console.");
+                });
+        }
+    };
+
+    // DELETE
+    const deletePatient = (id) => {
+        if (!window.confirm("Delete this patient?")) return;
+
+        axios.delete(`http://localhost:5000/delete-patient/${id}`)
+            .then(() => fetchPatients())
+            .catch((err) => console.log(err));
+    };
 
     return (
         <>
@@ -248,8 +345,8 @@ function AdminPage() {
                                                         <td>
                                                             <span className={
                                                                 doc.status === "Active" ? "status active" :
-                                                                doc.status === "On Leave" ? "status leave" :
-                                                                "status inactive"
+                                                                    doc.status === "On Leave" ? "status leave" :
+                                                                        "status inactive"
                                                             }>
                                                                 {doc.status}
                                                             </span>
@@ -360,6 +457,146 @@ function AdminPage() {
                                         <button className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
                                         <button className="save-btn" onClick={saveDoctor}>
                                             {isEditing ? "Update" : "Save"}
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── PATIENT PAGE ── */}
+                        {activePage === "patient" && (
+                            <div className="doctor-container">
+
+                                <div className="doctor-header">
+                                    <h4>🧑‍🦽 Manage Patients</h4>
+                                    <div className="doctor-actions">
+                                        <button className="add-btn" onClick={addPatient}>+ Add</button>
+                                    </div>
+                                </div>
+
+                                <div className="doctor-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>NAME</th>
+                                                <th>AGE</th>
+                                                <th>DISEASE</th>
+                                                <th>DOCTOR</th>
+                                                <th>ADMISSION</th>
+                                                <th>STATUS</th>
+                                                <th>ACTION</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            {patients.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="8" className="no-data">No patients found.</td>
+                                                </tr>
+                                            ) : (
+                                                patients.map((p) => (
+                                                    <tr key={p.id}>
+                                                        <td>{p.id}</td>
+                                                        <td>{p.name}</td>
+                                                        <td>{p.age}</td>
+                                                        <td>{p.disease}</td>
+                                                        <td>{p.doctor}</td>
+                                                        <td>
+                                                            {p.admission?.slice(0, 10)}
+                                                        </td>
+                                                        <td>
+                                                            <span className={
+                                                                p.status === "Admitted" ? "status active" :
+                                                                    "status inactive"
+                                                            }>
+                                                                {p.status}
+                                                            </span>
+                                                        </td>
+                                                        <td className="action-btns">
+                                                            <button className="edit-btn" onClick={() => editPatient(p)}>
+                                                                ✏️ Edit
+                                                            </button>
+                                                            <button className="delete-btn" onClick={() => deletePatient(p.id)}>
+                                                                🗑 Delete
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── MODAL: Add / Edit Patient ── */}
+                        {showPatientModal && (
+                            <div className="modal-overlay">
+                                <div className="modal-box">
+
+                                    <div className="modal-header">
+                                        <h4>{isPatientEditing ? "✏️ Edit Patient" : "➕ Add Patient"}</h4>
+                                        <button onClick={() => setShowPatientModal(false)}>✖</button>
+                                    </div>
+
+                                    <div className="modal-body">
+
+                                        <div className="form-group">
+                                            <label>Patient ID</label>
+                                            <input
+                                                name="id"
+                                                value={patientForm.id}
+                                                onChange={handlePatientChange}
+                                                disabled={isPatientEditing}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Name</label>
+                                            <input name="name" value={patientForm.name} onChange={handlePatientChange} />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Age</label>
+                                            <input name="age" value={patientForm.age} onChange={handlePatientChange} />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Disease</label>
+                                            <input name="disease" value={patientForm.disease} onChange={handlePatientChange} />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Doctor</label>
+                                            <input name="doctor" value={patientForm.doctor} onChange={handlePatientChange} />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Admission Date</label>
+                                            <input
+                                                type="date"
+                                                name="admission"
+                                                value={patientForm.admission}
+                                                onChange={handlePatientChange}
+                                            />
+                                        </div>
+
+                                        <div className="form-group full-width">
+                                            <label>Status</label>
+                                            <select name="status" value={patientForm.status} onChange={handlePatientChange}>
+                                                <option value="Admitted">Admitted</option>
+                                                <option value="Discharged">Discharged</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+
+                                    <div className="modal-footer">
+                                        <button className="cancel-btn" onClick={() => setShowPatientModal(false)}>Cancel</button>
+                                        <button className="save-btn" onClick={savePatient}>
+                                            {isPatientEditing ? "Update" : "Save"}
                                         </button>
                                     </div>
 

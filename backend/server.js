@@ -11,13 +11,14 @@ const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
-  port:3307,
-  database: "hospital_management"
+  port: 3307,
+  database: "hospital_management",
+  dateStrings: true,
 });
 
-db.connect(err => {
+db.connect((err) => {
   if (err) {
-    console.log("Database connection failed"+err);
+    console.log("Database connection failed" + err);
   } else {
     console.log("MySQL Connected");
   }
@@ -36,19 +37,18 @@ app.post("/add-user", (req, res) => {
         console.error(err);
         return res.status(400).json({
           success: false,
-          message: err.sqlMessage || "Registration failed"
+          message: err.sqlMessage || "Registration failed",
         });
       } else {
         res.send({ success: true, message: "User added successfully" });
       }
-    }
+    },
   );
 });
 
 app.get("/users", (req, res) => {
-    console.log('here');
+  console.log("here");
   db.query("SELECT * FROM users", (err, result) => {
-    
     if (err) {
       res.send(err);
     } else {
@@ -57,11 +57,9 @@ app.get("/users", (req, res) => {
   });
 });
 
-
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
-
 
 // Admin
 
@@ -98,28 +96,26 @@ app.post("/login", (req, res) => {
   });
 });
 
-
-
-// Admin Page 
-/// * doctor part 
+// Admin Page
+/// * doctor part
 
 app.post("/add-doctor", (req, res) => {
   const { id, name, specialization, dept, phone, email, status } = req.body;
 
   db.query(
     "INSERT INTO doctors ( id, name, specialization, dept, phone, email, status ) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [ id, name, specialization, dept, phone, email, status ],
+    [id, name, specialization, dept, phone, email, status],
     (err, result) => {
       if (err) {
         console.error(err);
         return res.status(400).json({
           success: false,
-          message: err.sqlMessage || "DOctor Entry Failed"
+          message: err.sqlMessage || "DOctor Entry Failed",
         });
       } else {
         res.send({ success: true, message: "Doctor Added Successfully" });
       }
-    }
+    },
   );
 });
 
@@ -148,11 +144,78 @@ app.put("/update-doctor/:id", (req, res) => {
         console.error(err);
         return res.status(400).json({
           success: false,
-          message: err.sqlMessage || "Doctor Update Failed"
+          message: err.sqlMessage || "Doctor Update Failed",
         });
       } else {
         res.send({ success: true, message: "Doctor Updated Successfully" });
       }
-    }
+    },
   );
+});
+
+/// * patient part
+// GET ALL PATIENTS
+// AFTER — format admission date as plain YYYY-MM-DD string
+app.get("/patients", (req, res) => {
+  db.query("SELECT *, DATE_FORMAT(admission, '%Y-%m-%d') AS admission FROM patients", (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result);
+  });
+});
+// ADD PATIENT (MANUAL ID)
+app.post("/add-patient", (req, res) => {
+  const { id, name, age, disease, doctor, admission, status } = req.body;
+
+  // Check if ID is missing before hitting the DB
+  if (!id) {
+    return res.status(400).json({ error: "ID is required" });
+  }
+
+  const sql = `
+        INSERT INTO patients (id, name, age, disease, doctor, admission, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+  db.query(
+    sql,
+    [id, name, age, disease, doctor, admission, status],
+    (err, result) => {
+      if (err) {
+        console.error("Database Error:", err.sqlMessage);
+        return res.status(500).json({ error: err.sqlMessage });
+      }
+      res.json("Patient added successfully");
+    },
+  );
+});
+
+// UPDATE PATIENT
+app.put("/update-patient/:id", (req, res) => {
+  const id = req.params.id;
+  const { name, age, disease, doctor, admission, status } = req.body;
+
+  const sql = `
+        UPDATE patients 
+        SET name=?, age=?, disease=?, doctor=?, admission=?, status=? 
+        WHERE id=?
+    `;
+
+  db.query(
+    sql,
+    [name, age, disease, doctor, admission, status, id],
+    (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json("Patient updated");
+    },
+  );
+});
+
+// DELETE PATIENT
+app.delete("/delete-patient/:id", (req, res) => {
+  const id = req.params.id;
+
+  db.query("DELETE FROM patients WHERE id=?", [id], (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json("Patient deleted");
+  });
 });
