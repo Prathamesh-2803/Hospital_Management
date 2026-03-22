@@ -1,53 +1,47 @@
-import '../style/adminlog.css'
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import '../style/adminlog.css';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
+function Doctorlog() {
+  const [email,    setEmail]    = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-function Doctorlog(){
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const navigate = useNavigate();
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const res  = await fetch('http://localhost:5000/doctor-login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('doctor', JSON.stringify(data.doctor));
+      navigate('/doctorpage');
+    } else {
+      alert(data.message || 'Login failed');
+    }
+  };
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        const response = await fetch("http://localhost:5000/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            alert("Login successful!");
-            localStorage.setItem("users", JSON.stringify(data.user));
-            navigate("/doctorpage");
-        } else {
-            alert("Invalid email or password");
-        }
-    };
-
-
-    return(
-        <>
-            <div className="adminlog-container">
-                <div className="container-fluid">
-                    <div className="adminlog-user bg-primary">
-                        <h2>Doctor Login</h2>
-                    </div>
-                    <form onSubmit={handleLogin}>
-                        <input type="text" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
-                        <input type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
-                        <button type="submit" className="btn btn-outline-success">Login</button>
-                        <hr />
-                        <div className="end">
-                            <p>New Doctor?</p>
-                            <span><a href="register">Register Here</a></span>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </>
-    )
+  return (
+    <div className="adminlog-container">
+      <div className="container-fluid">
+        <div className="adminlog-user bg-success">
+          <h2>Doctor Login</h2>
+        </div>
+        <form onSubmit={handleLogin}>
+          <input type="email"    placeholder="Email"    value={email}    onChange={e => setEmail(e.target.value)}    required />
+          <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
+          <button type="submit" className="btn btn-outline-success">Login</button>
+          <hr />
+          <div className="end">
+            <p>Credentials are set by Admin.</p>
+            <span><a href="/choice">← Back</a></span>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
 
 export default Doctorlog;

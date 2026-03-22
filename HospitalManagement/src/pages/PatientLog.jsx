@@ -2,22 +2,22 @@ import '../style/adminlog.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function Stafflog() {
+function PatientLog() {
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const res  = await fetch('http://localhost:5000/login', {
+    const res  = await fetch('http://localhost:5000/patient-login', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email, password }),
     });
     const data = await res.json();
     if (data.success) {
-      localStorage.setItem('users', JSON.stringify(data.user));
-      navigate('/staffpage');
+      localStorage.setItem('patient', JSON.stringify(data.patient));
+      navigate('/patientpage');
     } else {
       alert(data.message || 'Login failed');
     }
@@ -26,8 +26,8 @@ function Stafflog() {
   return (
     <div className="adminlog-container">
       <div className="container-fluid">
-        <div className="adminlog-user bg-warning">
-          <h2>Staff Login</h2>
+        <div className="adminlog-user bg-info">
+          <h2>Patient Login</h2>
         </div>
         <form onSubmit={handleLogin}>
           <input type="email"    placeholder="Email"    value={email}    onChange={e => setEmail(e.target.value)}    required />
@@ -35,8 +35,8 @@ function Stafflog() {
           <button type="submit" className="btn btn-outline-success">Login</button>
           <hr />
           <div className="end">
-            <p>New Staff?</p>
-            <span><a href="/staff-register">Register Here</a></span>
+            <p>New Patient?</p>
+            <span><a href="/patient-register">Register Here</a></span>
           </div>
         </form>
       </div>
@@ -44,4 +44,4 @@ function Stafflog() {
   );
 }
 
-export default Stafflog;
+export default PatientLog;
