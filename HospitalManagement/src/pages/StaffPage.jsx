@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API = 'https://hospital-backend-xxxx.onrender.com/api';
+const API = 'http://localhost:5000';
 
 function StaffPage() {
   const [user,     setUser]     = useState(null);

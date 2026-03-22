@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import '../style/adminpage.css';
 import axios from 'axios';
 
-const API = 'https://hospital-backend-xxxx.onrender.com/api';
+const API = 'http://localhost:5000';
 
 const blankDoc = { id:'', name:'', specialization:'', dept:'Cardiology', phone:'', email:'', status:'Active', password:'' };
 const blankPat = { id:'', name:'', age:'', disease:'', doctor:'', admission:'', status:'Admitted' };
