@@ -7,11 +7,11 @@ app.use(cors());
 app.use(express.json());
 
 const db = mysql.createConnection({
-  host:        "localhost",
+  host:        "mysql.railway.internal",
   user:        "root",
-  password:    "",
+  password:    "dUtQZMyHXottxHmbQIuvXDjjJbsTWXFn",
   port:        3306,
-  database:    "hospital_management",
+  database:    "railway",
   dateStrings: true,
 });
 
