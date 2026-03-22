@@ -12,7 +12,7 @@ function StaffRegister() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const res  = await fetch('http://localhost:5000/register-staff', {
+    const res  = await fetch('https://hospital-backend-xxxx.onrender.com/register-staff', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ id, name, email, password, phone }),

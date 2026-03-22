@@ -9,7 +9,7 @@ function Adminlog() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const res  = await fetch('http://localhost:5000/login', {
+    const res  = await fetch('https://hospital-backend-xxxx.onrender.com', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email, password }),
