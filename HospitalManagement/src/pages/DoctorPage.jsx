@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API = 'https://hospital-backend-xxxx.onrender.com';
+const API = 'https://hospital-backend-xxxx.onrender.com/api';
 
 function DoctorPage() {
   const [doctor,     setDoctor]     = useState(null);
