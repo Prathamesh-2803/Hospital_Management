@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 const db = mysql.createConnection({
-  host:        "mysql.railway.internal",
+  host:        "mysql://root:dUtQZMyHXottxHmbQIuvXDjjJbsTWXFn@autorack.proxy.rlwy.net:54953/railway",
   user:        "root",
   password:    "dUtQZMyHXottxHmbQIuvXDjjJbsTWXFn",
   port:        3306,
